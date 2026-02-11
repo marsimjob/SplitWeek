@@ -1,0 +1,6 @@
+@SplitWeek.Server_HostAddress = http://localhost:5201
+
+GET {{SplitWeek.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
