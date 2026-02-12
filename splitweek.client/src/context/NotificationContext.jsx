@@ -1,4 +1,5 @@
-import { createContext, useState, useEffect, useContext, useCallback } from 'react';
+import { createContext, useState, useEffect, useContext, useCallback, useRef } from 'react';
+import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { notificationsApi } from '../api/notificationsApi';
 import { useAuth } from './AuthContext';
 
@@ -8,6 +9,7 @@ export function NotificationProvider({ children }) {
   const { isAuthenticated } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
+  const connectionRef = useRef(null);
 
   const refreshCount = useCallback(async () => {
     if (!isAuthenticated) return;
@@ -30,6 +32,41 @@ export function NotificationProvider({ children }) {
     }
   }, [isAuthenticated, refreshCount]);
 
+  // Set up SignalR listener for real-time unread updates
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    const connection = new HubConnectionBuilder()
+      .withUrl('/hubs/chat', {
+        accessTokenFactory: () => token,
+      })
+      .withAutomaticReconnect()
+      .configureLogging(LogLevel.Warning)
+      .build();
+
+    connectionRef.current = connection;
+
+    connection.on('UnreadCountUpdated', () => {
+      refreshCount();
+    });
+
+    connection.on('ReceiveMessage', () => {
+      refreshCount();
+    });
+
+    connection.start().catch(() => {
+      // Fall back to polling if SignalR fails
+    });
+
+    return () => {
+      connection.stop();
+    };
+  }, [isAuthenticated, refreshCount]);
+
+  // Polling fallback
   useEffect(() => {
     if (isAuthenticated) {
       refreshCount();
