@@ -140,6 +140,29 @@ public class ChildrenController : ControllerBase
         return Ok(new { id = child.Id });
     }
 
+    [HttpGet("{childId}/parents")]
+    public async Task<IActionResult> GetParents(int childId)
+    {
+        var linked = await _db.ParentChildren.AnyAsync(pc => pc.ChildId == childId && pc.UserId == CurrentUserId);
+        if (!linked)
+            return NotFound(new { message = "Child not found or access denied." });
+
+        var parents = await _db.ParentChildren
+            .Where(pc => pc.ChildId == childId)
+            .Include(pc => pc.User)
+            .Select(pc => new
+            {
+                id = pc.UserId,
+                firstName = pc.User.FirstName,
+                lastName = pc.User.LastName,
+                role = pc.Role,
+                colorHex = pc.ColorHex
+            })
+            .ToListAsync();
+
+        return Ok(parents);
+    }
+
     [HttpPost("{childId}/invite")]
     public async Task<IActionResult> GenerateInvite(int childId)
     {

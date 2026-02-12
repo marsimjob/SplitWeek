@@ -7,4 +7,5 @@ export const childrenApi = {
   updateChild: (childId, data) => api.put(`/children/${childId}`, data),
   createInvite: (childId) => api.post(`/children/${childId}/invite`),
   acceptInvite: (token) => api.post('/children/accept-invite', { token }),
+  getParents: (childId) => api.get(`/children/${childId}/parents`),
 };
