@@ -39,11 +39,11 @@ export const PACKING_STATUSES = {
 };
 
 export const ROUTINE_TYPES = {
-  Morning: 'Morning',
-  Bedtime: 'Bedtime',
-  MealBreakfast: 'MealBreakfast',
-  MealLunch: 'MealLunch',
-  MealDinner: 'MealDinner',
+  Morning: 'Morning Routine',
+  Bedtime: 'Bedtime Routine',
+  MealBreakfast: 'Breakfast',
+  MealLunch: 'Lunch',
+  MealDinner: 'Dinner',
 };
 
 export const NOTIFICATION_CATEGORIES = {
